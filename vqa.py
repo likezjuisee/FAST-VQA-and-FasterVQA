@@ -43,6 +43,8 @@ if __name__ == "__main__":
     with open(args.opt, "r") as f:
         opt = yaml.safe_load(f)
 
+    print (opt)
+
     ### Model Definition
     evaluator = DiViDeAddEvaluator(**opt["model"]["args"]).to(args.device)
     evaluator.load_state_dict(torch.load(opt["test_load_path"], map_location=args.device)["state_dict"])
