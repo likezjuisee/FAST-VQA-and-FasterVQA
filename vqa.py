@@ -43,15 +43,13 @@ if __name__ == "__main__":
     with open(args.opt, "r") as f:
         opt = yaml.safe_load(f)
 
-    print (opt)
-
     ### Model Definition
     evaluator = DiViDeAddEvaluator(**opt["model"]["args"]).to(args.device)
     evaluator.load_state_dict(torch.load(opt["test_load_path"], map_location=args.device)["state_dict"])
 
     ### Data Definition
     vsamples = {}
-    t_data_opt = opt["data"]["val-kv1k"]["args"]
+    t_data_opt = opt["data"]["val-kv1k"]["args"]["sample_types"]["fragments"]
     s_data_opt = opt["data"]["val-kv1k"]["args"]["sample_types"]
     for sample_type, sample_args in s_data_opt.items():
         ## Sample Temporally
@@ -70,6 +68,10 @@ if __name__ == "__main__":
         video = video.permute(3, 0, 1, 2)
 
         ## Sample Spatially
+        sample_args.pop("clip_len")
+        sample_args.pop("frame_interval")
+        sample_args.pop("t_frag")
+        sample_args.pop("num_clips")
         sampled_video = get_spatial_fragments(video, **sample_args)
         mean, std = torch.FloatTensor([123.675, 116.28, 103.53]), torch.FloatTensor([58.395, 57.12, 57.375])
         sampled_video = ((sampled_video.permute(1, 2, 3, 0) - mean) / std).permute(3, 0, 1, 2)
